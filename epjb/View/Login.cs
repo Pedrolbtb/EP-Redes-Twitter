@@ -2,130 +2,67 @@
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using System.Windows.Forms;
+using epjb.Common;
 
 namespace epjb.View
 {
     public partial class Login : Form
     {
 
-        public class ObjectState
-        {
-            public const int bufferSize = 256;
-            public Socket wSocket = null;
-            public byte[] buffer = new byte[bufferSize];
-            public StringBuilder sb = new StringBuilder();
-        }
-
         public class AsyncSocketClient
         {
-            private const int Port = 4343;
-            private static ManualResetEvent connectCompleted = new ManualResetEvent(false);
-            private static ManualResetEvent sendCompleted = new ManualResetEvent(false);
-            private static ManualResetEvent receiveCompleted = new ManualResetEvent(false);
-            private static string respose = String.Empty;
+            private const int Port = Config.Porta;
 
-            public static void StartClient(string json)
+            public static void StartClient(string json, Form owner)
             {
-                try
+                // Execute em background para não bloquear a UI
+                System.Threading.Tasks.Task.Run(() =>
                 {
-                    IPHostEntry ipHost = Dns.GetHostEntry(Dns.GetHostName());
-                    IPAddress ip = ipHost.AddressList[0];
-                    IPEndPoint remoteEndPoint = new IPEndPoint(ip, Port);
-                    Socket client = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                    client.BeginConnect(remoteEndPoint, new AsyncCallback(ConnectCallback), client);
-                    connectCompleted.WaitOne();
-                    Send(client, "Essa eh uma mensagem de socket");
-                    sendCompleted.WaitOne();
-                    Receive(client);
-                    receiveCompleted.WaitOne();
-                    Console.WriteLine("Resposta do servidor: {0}", respose);
-                    client.Shutdown(SocketShutdown.Both);
-                    client.Close();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.ToString());
-                }
-            }
-
-            private static void Receive(Socket client)
-            {
-                try
-                {
-                    ObjectState state = new ObjectState();
-                    state.wSocket = client;
-                    client.BeginReceive(state.buffer, 0, ObjectState.bufferSize, 0, new AsyncCallback(ReceiveCallback), state);
-
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
-            }
-
-            private static void ReceiveCallback(IAsyncResult ar)
-            {
-                try
-                {
-                    ObjectState state = (ObjectState)ar.AsyncState;
-                    var client = state.wSocket;
-                    int bytesRead = client.EndReceive(ar);
-                    if (bytesRead > 0)
+                    try
                     {
-                        state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
-                        client.BeginReceive(state.buffer, 0, ObjectState.bufferSize, 0, new AsyncCallback(ReceiveCallback), state);
-
-                    }
-                    else
-                    {
-                        if (state.sb.Length > 1)
+                        Console.WriteLine("[Client] Antes de obter IP/endpoint");
+                        IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Loopback, Port);
+                        Console.WriteLine($"[Client] Endpoint: {remoteEndPoint}");
+                        using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
                         {
-                            respose = state.sb.ToString();
+                            Console.WriteLine("[Client] Antes de conectar");
+                            client.Connect(remoteEndPoint);
+                            Console.WriteLine("[Client] Conectado");
+
+                            // Envia Mensagem usando o Protocolo
+                            Console.WriteLine("[Client] Antes de enviar");
+                            Protocolo.Enviar(client, new Mensagem(Comando.LOGIN, json));
+                            Console.WriteLine("[Client] Depois de enviar");
+
+                            // Recebe resposta
+                            Console.WriteLine("[Client] Antes de receber");
+                            Mensagem resposta = Protocolo.Receber(client);
+                            Console.WriteLine("[Client] Depois de receber");
+
+                            if (resposta == null)
+                            {
+                                owner?.Invoke(() => MessageBox.Show(owner, "Sem resposta do servidor."));
+                            }
+                            else if (resposta.Sucesso)
+                            {
+                                owner?.Invoke(() => MessageBox.Show(owner, "Operação bem-sucedida."));
+                            }
+                            else
+                            {
+                                owner?.Invoke(() => MessageBox.Show(owner, $"Erro: {resposta.Erro}"));
+                            }
+                            try { client.Shutdown(SocketShutdown.Both); } catch { }
+                            client.Close();
                         }
-                        receiveCompleted.Set();
                     }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("ERRO: " + e.ToString());
+                        owner?.Invoke(() => MessageBox.Show(owner, e.ToString()));
+                    }
+                });
             }
-
-            private static void Send(Socket client, string message)
-            {
-                byte[] byteData = Encoding.ASCII.GetBytes(message);
-                client.BeginSend(byteData, 0, byteData.Length, 0, new AsyncCallback(SendCallback), client);
-            }
-
-            private static void SendCallback(IAsyncResult ar)
-            {
-                try
-                {
-                    Socket client = (Socket)ar.AsyncState;
-                    int bytesSent = client.EndSend(ar);
-                    sendCompleted.Set();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
-            }
-
-            private static void ConnectCallback(IAsyncResult ar)
-            {
-                try
-                {
-                    Socket client = (Socket)ar.AsyncState;
-                    client.EndConnect(ar);
-                    connectCompleted.Set();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
-            }
-
-
         }
         public Login()
         {
@@ -146,7 +83,7 @@ namespace epjb.View
             };
 
             string json = JsonSerializer.Serialize(payload);
-            AsyncSocketClient.StartClient(json);
+            AsyncSocketClient.StartClient(json, this);
         }
     }
 }

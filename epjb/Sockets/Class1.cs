@@ -1,31 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
+using System.Threading;
+using System.Threading.Tasks;
+using epjb.Common;
 
 namespace epjb.Sockets
 {
-    public class ObjectState
-    {
-        public Socket wSocket = null;
-        public const int bufferSize = 1024;
-        public byte[] buffer = new byte[bufferSize];
-        public StringBuilder sb = new StringBuilder();
-    }
-
     public class AsyncSocketListener
     {
         public static ManualResetEvent allDone = new ManualResetEvent(false);
         public static void StartListener()
         {
-            byte[] bytes = new Byte[1024];
-
-            IPHostEntry iPHost = Dns.GetHostEntry(Dns.GetHostName());
-            IPAddress ip = iPHost.
-                AddressList[0];
-            IPEndPoint localEndPoint = new IPEndPoint(ip, 11000);
-            Socket listener = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Config.Porta);
+            Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
             {
                 listener.Bind(localEndPoint);
@@ -52,52 +42,33 @@ namespace epjb.Sockets
             allDone.Set();
             Socket listener = (Socket)ar.AsyncState;
             Socket handler = listener.EndAccept(ar);
-            ObjectState state = new ObjectState();
-            state.wSocket = handler;
-            handler.BeginReceive(state.buffer, 0, ObjectState.bufferSize, 0, new AsyncCallback(ReadCallback), state);
+
+            // Rode um loop de atendimento por cliente em uma Task separada,
+            // usando Protocolo.Receber / Protocolo.Enviar.
+            Task.Run(() => HandleClient(handler));
         }
 
-        private static void ReadCallback(IAsyncResult ar)
-        {
-            String content = String.Empty;
-            ObjectState state = (ObjectState)ar.AsyncState;
-            Socket handler = state.wSocket;
-            int bytesRead = handler.EndReceive(ar);
-            if (bytesRead > 0)
-            {
-                state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
-                content = state.sb.ToString();
-                if (content.IndexOf("<EOF>", StringComparison.Ordinal) > -1)
-                {
-                    Console.WriteLine($"Lido: {content.Length} bytes from socket Data: {content}");
-                    Send(handler, content);
-                }
-                else
-                {
-                    handler.BeginReceive(state.buffer, 0, ObjectState.bufferSize, 0, new AsyncCallback(ReadCallback), state);
-                }
-            }
-        }
-
-        public static void Send(Socket handler, String data)
-        {
-            byte[] byteData = Encoding.ASCII.GetBytes(data);
-            handler.BeginSend(byteData, 0, byteData.Length, 0, new AsyncCallback(SendCallback), handler);
-        }
-
-        private static void SendCallback(IAsyncResult ar)
+        private static void HandleClient(Socket handler)
         {
             try
             {
-                Socket handler = (Socket)ar.AsyncState;
-                int bytesSent = handler.EndSend(ar);
-                Console.WriteLine($"Enviado {bytesSent} bytes para o cliente.");
-                handler.Shutdown(SocketShutdown.Both);
-                handler.Close();
+                while (true)
+                {
+                    Mensagem msg = Protocolo.Receber(handler);
+                    if (msg == null) break; // cliente desconectou
+                    Console.WriteLine($"Recebido comando: {msg.Tipo}");
+                    // exemplo: eco de sucesso com mesmo payload
+                    Protocolo.Enviar(handler, Mensagem.RespostaSucesso(msg.Tipo, msg.PayloadJson));
+                }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine(e.ToString());
+                Console.WriteLine($"Erro no cliente: {ex}");
+            }
+            finally
+            {
+                try { handler.Shutdown(SocketShutdown.Both); } catch { }
+                try { handler.Close(); } catch { }
             }
         }
     }

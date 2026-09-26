@@ -8,6 +8,10 @@ namespace epjb
     {
         static void Main()
         {
+            // Temporário: iniciar o servidor neste processo para testes locais.
+            // Remover ou revisar quando o grupo decidir como o servidor será executado (processo separado conforme roteiro).
+            System.Threading.Tasks.Task.Run(() => AsyncSocketListener.StartListener());
+
             ApplicationConfiguration.Initialize();
             Application.Run(new View.Login());
         }
