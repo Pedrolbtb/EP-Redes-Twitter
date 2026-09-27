@@ -1,69 +1,12 @@
-﻿using System.Net;
-using System.Net.Sockets;
-using System.Text;
+﻿using System;
 using System.Text.Json;
 using System.Windows.Forms;
-using epjb.Common;
+using epjb.Cliente.Rede;
 
 namespace epjb.View
 {
     public partial class Login : Form
     {
-
-        public class AsyncSocketClient
-        {
-            private const int Port = Config.Porta;
-
-            public static void StartClient(string json, Form owner)
-            {
-                // Execute em background para não bloquear a UI
-                System.Threading.Tasks.Task.Run(() =>
-                {
-                    try
-                    {
-                        Console.WriteLine("[Client] Antes de obter IP/endpoint");
-                        IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Loopback, Port);
-                        Console.WriteLine($"[Client] Endpoint: {remoteEndPoint}");
-                        using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
-                        {
-                            Console.WriteLine("[Client] Antes de conectar");
-                            client.Connect(remoteEndPoint);
-                            Console.WriteLine("[Client] Conectado");
-
-                            // Envia Mensagem usando o Protocolo
-                            Console.WriteLine("[Client] Antes de enviar");
-                            Protocolo.Enviar(client, new Mensagem(Comando.LOGIN, json));
-                            Console.WriteLine("[Client] Depois de enviar");
-
-                            // Recebe resposta
-                            Console.WriteLine("[Client] Antes de receber");
-                            Mensagem resposta = Protocolo.Receber(client);
-                            Console.WriteLine("[Client] Depois de receber");
-
-                            if (resposta == null)
-                            {
-                                owner?.Invoke(() => MessageBox.Show(owner, "Sem resposta do servidor."));
-                            }
-                            else if (resposta.Sucesso)
-                            {
-                                owner?.Invoke(() => MessageBox.Show(owner, "Operação bem-sucedida."));
-                            }
-                            else
-                            {
-                                owner?.Invoke(() => MessageBox.Show(owner, $"Erro: {resposta.Erro}"));
-                            }
-                            try { client.Shutdown(SocketShutdown.Both); } catch { }
-                            client.Close();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("ERRO: " + e.ToString());
-                        owner?.Invoke(() => MessageBox.Show(owner, e.ToString()));
-                    }
-                });
-            }
-        }
         public Login()
         {
             InitializeComponent();
@@ -74,16 +17,72 @@ namespace epjb.View
             this.Close();
         }
 
-        private void btnLogin_Click(object sender, EventArgs e)
+        private async void btnLogin_Click(object sender, EventArgs e)
         {
-            var payload = new
-            {
-                username = txtUsuario.Text,
-                password = txtSenha.Text
-            };
+            string username = txtUsuario.Text.Trim();
+            string password = txtSenha.Text;
 
-            string json = JsonSerializer.Serialize(payload);
-            AsyncSocketClient.StartClient(json, this);
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            {
+                MessageBox.Show(this, "Preencha username e senha.");
+                return;
+            }
+
+            var servico = new ServicoApi();
+            try
+            {
+                btnLogin.Enabled = false;
+                btnLogin.Text = "Autenticando...";
+
+                var resposta = await servico.LoginAsync(username, password);
+
+                if (resposta == null)
+                {
+                    MessageBox.Show(this, "Sem resposta do servidor.");
+                }
+                else if (resposta.Sucesso)
+                {
+                    // Parse response para obter ID do usuário
+                    var userData = JsonSerializer.Deserialize<JsonElement>(resposta.PayloadJson);
+                    int usuarioId = userData.GetProperty("id").GetInt32();
+                    string usuarioUsername = userData.GetProperty("username").GetString();
+
+                    // Abre tela Menu
+                    Menu menu = new Menu(usuarioId, usuarioUsername);
+                    this.Hide();
+                    menu.ShowDialog();
+                    this.Show();
+
+                    // Limpa campos
+                    txtUsuario.Clear();
+                    txtSenha.Clear();
+                }
+                else
+                {
+                    MessageBox.Show(this, $"Erro: {resposta.Erro}");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, $"Erro ao conectar: {ex.Message}");
+            }
+            finally
+            {
+                servico?.Dispose();
+                btnLogin.Enabled = true;
+                btnLogin.Text = "Login";
+            }
+        }
+
+        private void btnCadastro_Click(object sender, EventArgs e)
+        {
+            var cadastro = new Cadastro();
+            var result = cadastro.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                MessageBox.Show(this, "Cadastro concluído! Faça login com suas credenciais.");
+            }
         }
     }
 }

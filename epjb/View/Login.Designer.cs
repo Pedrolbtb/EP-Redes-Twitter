@@ -14,6 +14,7 @@
         private System.Windows.Forms.TextBox txtSenha;
         private System.Windows.Forms.Button btnLogin;
         private System.Windows.Forms.Button btnFechar;
+        private System.Windows.Forms.Button btnCadastro;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -42,6 +43,7 @@
             this.txtSenha = new System.Windows.Forms.TextBox();
             this.btnLogin = new System.Windows.Forms.Button();
             this.btnFechar = new System.Windows.Forms.Button();
+            this.btnCadastro = new System.Windows.Forms.Button();
             this.SuspendLayout();
 
             // lblUsuario
@@ -76,17 +78,26 @@
             // btnLogin
             this.btnLogin.Location = new System.Drawing.Point(50, 170);
             this.btnLogin.Name = "btnLogin";
-            this.btnLogin.Size = new System.Drawing.Size(140, 30);
+            this.btnLogin.Size = new System.Drawing.Size(100, 30);
             this.btnLogin.TabIndex = 4;
             this.btnLogin.Text = "Login";
             this.btnLogin.UseVisualStyleBackColor = true;
             this.btnLogin.Click += new System.EventHandler(this.btnLogin_Click);
 
+            // btnCadastro
+            this.btnCadastro.Location = new System.Drawing.Point(160, 170);
+            this.btnCadastro.Name = "btnCadastro";
+            this.btnCadastro.Size = new System.Drawing.Size(100, 30);
+            this.btnCadastro.TabIndex = 5;
+            this.btnCadastro.Text = "Cadastro";
+            this.btnCadastro.UseVisualStyleBackColor = true;
+            this.btnCadastro.Click += new System.EventHandler(this.btnCadastro_Click);
+
             // btnFechar
-            this.btnFechar.Location = new System.Drawing.Point(210, 170);
+            this.btnFechar.Location = new System.Drawing.Point(270, 170);
             this.btnFechar.Name = "btnFechar";
-            this.btnFechar.Size = new System.Drawing.Size(140, 30);
-            this.btnFechar.TabIndex = 5;
+            this.btnFechar.Size = new System.Drawing.Size(80, 30);
+            this.btnFechar.TabIndex = 6;
             this.btnFechar.Text = "Fechar";
             this.btnFechar.UseVisualStyleBackColor = true;
             this.btnFechar.Click += new System.EventHandler(this.btnFechar_Click);
@@ -95,12 +106,13 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(400, 250);
-            this.Controls.Add(this.lblUsuario);
-            this.Controls.Add(this.txtUsuario);
-            this.Controls.Add(this.lblSenha);
-            this.Controls.Add(this.txtSenha);
-            this.Controls.Add(this.btnLogin);
             this.Controls.Add(this.btnFechar);
+            this.Controls.Add(this.btnCadastro);
+            this.Controls.Add(this.btnLogin);
+            this.Controls.Add(this.txtSenha);
+            this.Controls.Add(this.lblSenha);
+            this.Controls.Add(this.txtUsuario);
+            this.Controls.Add(this.lblUsuario);
             this.Name = "Login";
             this.Text = "Login";
             this.ResumeLayout(false);
