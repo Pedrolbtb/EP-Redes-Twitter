@@ -10,7 +10,7 @@ namespace epjb.Repositorio
     /// <summary>
     /// Repositório para operações com mensagens.
     /// </summary>
-    public class MensagemRepositorio
+    public class MensagemRepositorio : IDisposable
     {
         private readonly AppDbContext dbContext;
 

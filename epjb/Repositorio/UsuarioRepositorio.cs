@@ -9,7 +9,7 @@ namespace epjb.Repositorio
     /// <summary>
     /// Repositório de usuários com operações de autenticação e gerenciamento.
     /// </summary>
-    public class UsuarioRepositorio
+    public class UsuarioRepositorio : IDisposable
     {
         private readonly AppDbContext dbContext;
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Windows.Forms;
 using epjb.Cliente.Rede;
+using epjb.Common.DTO;
 
 namespace epjb.View
 {
@@ -36,7 +37,7 @@ namespace epjb.View
 
                 if (resposta?.Sucesso == true)
                 {
-                    var mensagens = JsonSerializer.Deserialize<List<dynamic>>(resposta.PayloadJson);
+                    var mensagens = JsonSerializer.Deserialize<List<MensagemResumo>>(resposta.PayloadJson);
 
                     dgvMensagens.DataSource = null;
                     dgvMensagens.DataSource = mensagens;
@@ -57,7 +58,7 @@ namespace epjb.View
 
                 if (resposta?.Sucesso == true)
                 {
-                    var usuarios = JsonSerializer.Deserialize<List<dynamic>>(resposta.PayloadJson);
+                    var usuarios = JsonSerializer.Deserialize<List<UsuarioResumo>>(resposta.PayloadJson);
 
                     cmbUsuarios.DataSource = null;
                     cmbUsuarios.DataSource = usuarios;
@@ -79,9 +80,10 @@ namespace epjb.View
 
                 if (resposta?.Sucesso == true)
                 {
-                    var seguindo = JsonSerializer.Deserialize<List<dynamic>>(resposta.PayloadJson);
+                    var seguindo = JsonSerializer.Deserialize<List<UsuarioResumo>>(resposta.PayloadJson) ?? new();
 
                     lstSeguindo.DataSource = null;
+                    lstSeguindo.Items.Clear();
                     foreach (var user in seguindo)
                     {
                         lstSeguindo.Items.Add(user);
@@ -219,6 +221,8 @@ namespace epjb.View
         private async void btnAtualizar_Click(object sender, EventArgs e)
         {
             await CarregarTimeline();
+            await CarregarUsuarios();
+            await CarregarMeusSeguindo();
         }
     }
 }

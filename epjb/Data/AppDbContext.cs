@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using epjb.Models;
 
 namespace epjb.Data
@@ -9,9 +9,20 @@ namespace epjb.Data
         public DbSet<Mensagem> Mensagens { get; set; }
         public DbSet<UsuarioSeguidor> UsuarioSeguidores { get; set; }
 
+        // Caminho estável, independente do diretório de onde o servidor foi iniciado.
+        public static string CaminhoBanco => Path.GetFullPath(
+            Environment.GetEnvironmentVariable("EPJB_DB_PATH")
+            ?? Path.Combine(AppContext.BaseDirectory, "dados", "epjb.db"));
+
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            options.UseSqlite("Data Source=epjb.db");
+            Directory.CreateDirectory(Path.GetDirectoryName(CaminhoBanco)!);
+            var connectionString = new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder
+            {
+                DataSource = CaminhoBanco,
+                DefaultTimeout = 30
+            };
+            options.UseSqlite(connectionString.ToString());
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -11,28 +11,33 @@ namespace epjb.Cliente.Rede
     /// </summary>
     public class ConexaoServidor : IDisposable
     {
-        private const int Porta = Config.Porta;
-        private Socket socket;
+        private Socket socket = null!;
         private bool conectado = false;
 
         public bool EstaConectado => conectado && socket?.Connected == true;
 
         /// <summary>
-        /// Conecta ao servidor usando o endereço de loopback (localhost).
+        /// Conecta ao endereço configurado em servidor.json ou EPJB_SERVER_HOST.
         /// </summary>
         public void Conectar()
         {
             try
             {
                 Console.WriteLine("[ConexaoServidor] Iniciando conexão...");
-                IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Loopback, Porta);
-                socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                socket.Connect(remoteEndPoint);
+                var config = ConfiguracaoServidor.Carregar();
+                socket = new Socket(SocketType.Stream, ProtocolType.Tcp)
+                {
+                    ReceiveTimeout = 15000,
+                    SendTimeout = 15000
+                };
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                socket.ConnectAsync(config.Host, config.Porta, timeout.Token).AsTask().GetAwaiter().GetResult();
                 conectado = true;
                 Console.WriteLine("[ConexaoServidor] Conectado com sucesso");
             }
             catch (Exception ex)
             {
+                socket?.Dispose();
                 conectado = false;
                 Console.WriteLine($"[ConexaoServidor] Erro ao conectar: {ex.Message}");
                 throw;

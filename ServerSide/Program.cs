@@ -1,17 +1,16 @@
-namespace epjb
+using epjb.Data;
+using epjb.Sockets;
+using Microsoft.EntityFrameworkCore;
+
+try
 {
-    internal static class Program
-    {
-        /// <summary>
-        ///  The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main()
-        {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
-            ApplicationConfiguration.Initialize();
-            Application.Run(new View.Login());
-        }
-    }
+    Console.WriteLine($"Banco central: {AppDbContext.CaminhoBanco}");
+    using (var db = new AppDbContext())
+        db.Database.Migrate();
+    AsyncSocketListener.StartListener();
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"Não foi possível iniciar o servidor: {ex.Message}");
+    Environment.ExitCode = 1;
 }

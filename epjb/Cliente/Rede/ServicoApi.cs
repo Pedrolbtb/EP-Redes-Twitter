@@ -10,15 +10,8 @@ namespace epjb.Cliente.Rede
     /// Serviço de API que encapsula chamadas específicas do cliente (Login, Cadastro, Mensagens, etc).
     /// Utiliza ConexaoServidor para gerenciar a conexão.
     /// </summary>
-    public class ServicoApi
+    public class ServicoApi : IDisposable
     {
-        private ConexaoServidor conexao;
-
-        public ServicoApi()
-        {
-            conexao = new ConexaoServidor();
-        }
-
         /// <summary>
         /// Realiza o login do usuário de forma assíncrona.
         /// </summary>
@@ -99,6 +92,7 @@ namespace epjb.Cliente.Rede
         {
             return await Task.Run(() =>
             {
+                using var conexao = new ConexaoServidor();
                 try
                 {
                     Console.WriteLine($"[ServicoApi] Executando comando: {tipo}");
@@ -134,7 +128,7 @@ namespace epjb.Cliente.Rede
 
         public void Dispose()
         {
-            conexao?.Dispose();
+            // Cada chamada possui e descarta sua própria conexão.
         }
     }
 }

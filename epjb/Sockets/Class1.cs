@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -12,41 +12,17 @@ namespace epjb.Sockets
 {
     public class AsyncSocketListener
     {
-        public static ManualResetEvent allDone = new ManualResetEvent(false);
         public static void StartListener()
         {
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Config.Porta);
-            Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            try
+            using var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            listener.Bind(new IPEndPoint(IPAddress.Any, Config.Porta));
+            listener.Listen(100);
+            Console.WriteLine($"Servidor TCP aguardando clientes em 0.0.0.0:{Config.Porta}");
+            while (true)
             {
-                listener.Bind(localEndPoint);
-                listener.Listen(100);
-
-                while (true)
-                {
-                    allDone.Reset();
-                    Console.WriteLine("Aguardando conexão...");
-                    listener.BeginAccept(new AsyncCallback(AcceptCallback), listener);
-                    allDone.WaitOne();
-                }
+                Socket handler = listener.Accept();
+                Task.Run(() => HandleClient(handler));
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-            Console.WriteLine("Pressione ENTER para continuar...");
-            Console.ReadLine();
-        }
-
-        private static void AcceptCallback(IAsyncResult ar)
-        {
-            allDone.Set();
-            Socket listener = (Socket)ar.AsyncState;
-            Socket handler = listener.EndAccept(ar);
-
-            // Rode um loop de atendimento por cliente em uma Task separada,
-            // usando Protocolo.Receber / Protocolo.Enviar.
-            Task.Run(() => HandleClient(handler));
         }
 
         private static void HandleClient(Socket handler)
@@ -141,7 +117,7 @@ namespace epjb.Sockets
                 }
 
                 // Valida no banco de dados
-                var repositorio = new UsuarioRepositorio();
+                using var repositorio = new UsuarioRepositorio();
                 var usuario = repositorio.Autenticar(loginRequest.Username, loginRequest.Password);
 
                 if (usuario != null)
@@ -179,7 +155,7 @@ namespace epjb.Sockets
                 }
 
                 // Registra novo usuário
-                var repositorio = new UsuarioRepositorio();
+                using var repositorio = new UsuarioRepositorio();
                 var usuario = repositorio.Registrar(cadastroRequest.Username, cadastroRequest.Password);
 
                 if (usuario != null)
@@ -206,7 +182,7 @@ namespace epjb.Sockets
         {
             try
             {
-                var repoMensagem = new MensagemRepositorio();
+                using var repoMensagem = new MensagemRepositorio();
                 var mensagens = repoMensagem.ListarTodas();
 
                 var response = JsonSerializer.Serialize(mensagens.Select(m => new
@@ -236,15 +212,15 @@ namespace epjb.Sockets
             try
             {
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                dynamic payload = JsonSerializer.Deserialize<dynamic>(msg.PayloadJson, options);
+                JsonElement payload = JsonSerializer.Deserialize<JsonElement>(msg.PayloadJson, options);
 
-                if (payload == null)
+                if (payload.ValueKind != JsonValueKind.Object)
                     return Mensagem.RespostaErro(Comando.POSTAR_MSG, "Payload inválido");
 
                 int idUsuario = (int)payload.GetProperty("idUsuario").GetInt32();
                 string conteudo = payload.GetProperty("conteudo").GetString();
 
-                var repoMensagem = new MensagemRepositorio();
+                using var repoMensagem = new MensagemRepositorio();
                 var mensagem = repoMensagem.Criar(idUsuario, conteudo);
 
                 if (mensagem != null)
@@ -272,15 +248,15 @@ namespace epjb.Sockets
             try
             {
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                dynamic payload = JsonSerializer.Deserialize<dynamic>(msg.PayloadJson, options);
+                JsonElement payload = JsonSerializer.Deserialize<JsonElement>(msg.PayloadJson, options);
 
-                if (payload == null)
+                if (payload.ValueKind != JsonValueKind.Object)
                     return Mensagem.RespostaErro(Comando.DELETAR_MSG, "Payload inválido");
 
                 int idMensagem = (int)payload.GetProperty("idMensagem").GetInt32();
                 int idUsuario = (int)payload.GetProperty("idUsuario").GetInt32();
 
-                var repoMensagem = new MensagemRepositorio();
+                using var repoMensagem = new MensagemRepositorio();
                 bool deletado = repoMensagem.Deletar(idMensagem, idUsuario);
 
                 if (deletado)
@@ -307,15 +283,15 @@ namespace epjb.Sockets
             try
             {
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                dynamic payload = JsonSerializer.Deserialize<dynamic>(msg.PayloadJson, options);
+                JsonElement payload = JsonSerializer.Deserialize<JsonElement>(msg.PayloadJson, options);
 
-                if (payload == null)
+                if (payload.ValueKind != JsonValueKind.Object)
                     return Mensagem.RespostaErro(Comando.SEGUIR, "Payload inválido");
 
                 int idUsuario = (int)payload.GetProperty("idUsuario").GetInt32();
                 int idUsuarioASeguir = (int)payload.GetProperty("idUsuarioASeguir").GetInt32();
 
-                var repoSeguidor = new SeguidorRepositorio();
+                using var repoSeguidor = new SeguidorRepositorio();
                 bool sucesso = repoSeguidor.Seguir(idUsuario, idUsuarioASeguir);
 
                 if (sucesso)
@@ -341,7 +317,7 @@ namespace epjb.Sockets
         {
             try
             {
-                var repoUsuario = new UsuarioRepositorio();
+                using var repoUsuario = new UsuarioRepositorio();
                 var usuarios = repoUsuario.ListarTodos();
 
                 var response = JsonSerializer.Serialize(usuarios.Select(u => new
@@ -368,14 +344,14 @@ namespace epjb.Sockets
             try
             {
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                dynamic payload = JsonSerializer.Deserialize<dynamic>(msg.PayloadJson, options);
+                JsonElement payload = JsonSerializer.Deserialize<JsonElement>(msg.PayloadJson, options);
 
-                if (payload == null)
+                if (payload.ValueKind != JsonValueKind.Object)
                     return Mensagem.RespostaErro(Comando.LISTAR_MEUS_SEGUIDORES, "Payload inválido");
 
                 int idUsuario = (int)payload.GetProperty("idUsuario").GetInt32();
 
-                var repoSeguidor = new SeguidorRepositorio();
+                using var repoSeguidor = new SeguidorRepositorio();
                 var seguidores = repoSeguidor.ListarSeguidores(idUsuario);
 
                 var response = JsonSerializer.Serialize(seguidores.Select(u => new
@@ -401,14 +377,14 @@ namespace epjb.Sockets
             try
             {
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                dynamic payload = JsonSerializer.Deserialize<dynamic>(msg.PayloadJson, options);
+                JsonElement payload = JsonSerializer.Deserialize<JsonElement>(msg.PayloadJson, options);
 
-                if (payload == null)
+                if (payload.ValueKind != JsonValueKind.Object)
                     return Mensagem.RespostaErro(Comando.LISTAR_MEUS_SEGUINDO, "Payload inválido");
 
                 int idUsuario = (int)payload.GetProperty("idUsuario").GetInt32();
 
-                var repoSeguidor = new SeguidorRepositorio();
+                using var repoSeguidor = new SeguidorRepositorio();
                 var seguindo = repoSeguidor.ListarSeguindo(idUsuario);
 
                 var response = JsonSerializer.Serialize(seguindo.Select(u => new

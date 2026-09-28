@@ -9,7 +9,7 @@ namespace epjb.Repositorio
     /// <summary>
     /// Repositório para operações de seguir/desseguir usuários.
     /// </summary>
-    public class SeguidorRepositorio
+    public class SeguidorRepositorio : IDisposable
     {
         private readonly AppDbContext dbContext;
 

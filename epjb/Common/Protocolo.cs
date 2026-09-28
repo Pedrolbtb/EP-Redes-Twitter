@@ -13,8 +13,8 @@ namespace epjb.Common
             byte[] payload = Encoding.UTF8.GetBytes(json);
             byte[] tamanho = BitConverter.GetBytes(payload.Length);
             if (BitConverter.IsLittleEndian) Array.Reverse(tamanho);
-            socket.Send(tamanho);
-            socket.Send(payload);
+            EnviarExato(socket, tamanho);
+            EnviarExato(socket, payload);
         }
 
         public static Mensagem Receber(Socket socket)
@@ -28,6 +28,17 @@ namespace epjb.Common
             if (payload == null) return null;
             string json = Encoding.UTF8.GetString(payload);
             return JsonSerializer.Deserialize<Mensagem>(json);
+        }
+
+        private static void EnviarExato(Socket socket, byte[] buffer)
+        {
+            int enviados = 0;
+            while (enviados < buffer.Length)
+            {
+                int quantidade = socket.Send(buffer, enviados, buffer.Length - enviados, SocketFlags.None);
+                if (quantidade == 0) throw new IOException("Conexão encerrada durante o envio.");
+                enviados += quantidade;
+            }
         }
 
         private static byte[] ReceberExato(Socket socket, int quantidade)
