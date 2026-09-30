@@ -1,5 +1,16 @@
 # EP Redes — Twitter simplificado
 
+## Conexão recusada ao abrir o cliente
+
+No PC do banco, execute `iniciar-servidor.cmd` e aguarde **Servidor TCP aguardando
+clientes**. Nos PCs dos usuários, execute `iniciar-cliente.cmd` e abra **Servidor...**
+na tela de login para informar o IP do servidor, **Testar conexão** e **Salvar**.
+No outro PC, não use `localhost`. Os atalhos requerem Windows e SDK .NET 10.
+
+A comunicação principal usa sockets TCP manuais; há também um diagnóstico UDP
+manual na porta 11001. Veja o [guia de sockets, comentários e diagnóstico](docs/SOCKETS_E_CONEXAO.md)
+para operações de rede, firewall, testes e diferenças entre os protocolos.
+
 ## Dois computadores usando o mesmo banco
 
 Execute **um único ServerSide**. Cada pessoa abre o cliente `epjb`, configurado
@@ -89,8 +100,9 @@ Os clientes não criam nem abrem arquivos SQLite.
 
 O teste usa o serviço de rede real do cliente e um servidor em processo separado,
 com banco temporário. Verifica duas contas, chamadas simultâneas, feed comum,
-seguir e persistência após reiniciar o servidor em outro diretório.
-A porta 11000 deve estar livre. Na raiz do projeto:
+seguir e persistência após reiniciar o servidor em outro diretório. Também testa
+conexão recusada, configuração, framing TCP e diagnóstico UDP.
+As portas 11000/TCP e 11001/UDP devem estar livres. Na raiz do projeto:
 
 ```powershell
 dotnet build ServerSide/ServerSide.csproj

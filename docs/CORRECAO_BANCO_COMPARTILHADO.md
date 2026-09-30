@@ -1,5 +1,7 @@
 # Correção: dois clientes acessando o mesmo banco
 
+> Complemento de 30/09/2026: [diagnóstico de conexão, sockets TCP/UDP e comentários no código](SOCKETS_E_CONEXAO.md). Os resultados de compilação abaixo registram a primeira versão da correção.
+
 ## Problema e causa
 
 Ao abrir `epjb`, `Program.Main` iniciava um servidor dentro do próprio cliente.
