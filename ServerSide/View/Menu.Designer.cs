@@ -1,4 +1,5 @@
-﻿namespace ServerSide.View
+// Formulário legado não compilado por ServerSide (servidor atual é console).
+namespace ServerSide.View
 {
     partial class Menu
     {

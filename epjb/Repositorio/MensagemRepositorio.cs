@@ -16,6 +16,7 @@ namespace epjb.Repositorio
 
         public MensagemRepositorio()
         {
+            // Contextos EF não são compartilhados entre as tarefas dos clientes.
             dbContext = new AppDbContext();
         }
 
@@ -90,6 +91,7 @@ namespace epjb.Repositorio
                 };
 
                 dbContext.Mensagens.Add(mensagem);
+                // Confirma as alterações no SQLite central antes de responder ao cliente.
                 dbContext.SaveChanges();
 
                 Console.WriteLine($"[MensagemRepositorio] Mensagem criada com ID {mensagem.Id}");
@@ -130,6 +132,7 @@ namespace epjb.Repositorio
 
                 mensagem.Conteudo = novoConteudo;
                 mensagem.DataEdicao = DateTime.Now;
+                // Confirma as alterações no SQLite central antes de responder ao cliente.
                 dbContext.SaveChanges();
 
                 Console.WriteLine($"[MensagemRepositorio] Mensagem {idMensagem} editada");
@@ -163,6 +166,7 @@ namespace epjb.Repositorio
                 }
 
                 dbContext.Mensagens.Remove(mensagem);
+                // Confirma as alterações no SQLite central antes de responder ao cliente.
                 dbContext.SaveChanges();
 
                 Console.WriteLine($"[MensagemRepositorio] Mensagem {idMensagem} deletada");
@@ -191,6 +195,7 @@ namespace epjb.Repositorio
             }
         }
 
+        // O using do handler chama Dispose mesmo se ocorrer exceção durante a consulta.
         public void Dispose()
         {
             dbContext?.Dispose();

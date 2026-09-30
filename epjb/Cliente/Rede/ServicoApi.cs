@@ -7,8 +7,8 @@ using epjb.Common;
 namespace epjb.Cliente.Rede
 {
     /// <summary>
-    /// Serviço de API que encapsula chamadas específicas do cliente (Login, Cadastro, Mensagens, etc).
-    /// Utiliza ConexaoServidor para gerenciar a conexão.
+    /// Monta comandos do nosso protocolo TCP; o nome API não significa uma API HTTP.
+    /// ConexaoServidor e Protocolo são fontes do grupo com as operações de Socket explícitas.
     /// </summary>
     public class ServicoApi : IDisposable
     {
@@ -90,8 +90,10 @@ namespace epjb.Cliente.Rede
         /// </summary>
         private async Task<Mensagem> ExecutarComandoAsync(Comando tipo, object payload)
         {
+            // Apenas o agendamento é delegado à Task. Todo o transporte é Socket programado pelo grupo.
             return await Task.Run(() =>
             {
+                // Uma conexão por requisição evita misturar respostas de botões acionados simultaneamente.
                 using var conexao = new ConexaoServidor();
                 try
                 {
@@ -117,11 +119,6 @@ namespace epjb.Cliente.Rede
                 {
                     Console.WriteLine($"[ServicoApi] Erro: {ex.Message}");
                     return Mensagem.RespostaErro(tipo, ex.Message);
-                }
-                finally
-                {
-                    // Sempre desconecta
-                    conexao.Desconectar();
                 }
             });
         }

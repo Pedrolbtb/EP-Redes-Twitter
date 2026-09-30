@@ -15,6 +15,7 @@ namespace epjb.Repositorio
 
         public UsuarioRepositorio()
         {
+            // Contextos EF não são compartilhados entre as tarefas dos clientes.
             dbContext = new AppDbContext();
         }
 
@@ -92,6 +93,7 @@ namespace epjb.Repositorio
                 };
 
                 dbContext.Usuarios.Add(usuario);
+                // Confirma as alterações no SQLite central antes de responder ao cliente.
                 dbContext.SaveChanges();
 
                 Console.WriteLine($"[UsuarioRepositorio] Usuário {username} registrado com sucesso");
@@ -155,6 +157,7 @@ namespace epjb.Repositorio
             }
         }
 
+        // O using do handler chama Dispose mesmo se ocorrer exceção durante a consulta.
         public void Dispose()
         {
             dbContext?.Dispose();

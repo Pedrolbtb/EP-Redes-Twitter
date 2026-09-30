@@ -7,11 +7,13 @@ namespace epjb.View
 {
     public partial class Cadastro : Form
     {
+        // Inicializa os controles gerados pelo Designer.
         public Cadastro()
         {
             InitializeComponent();
         }
 
+        // Confere nome/senha/confirmação localmente e envia CADASTRO ao banco central por TCP.
         private async void btnCadastrar_Click(object sender, EventArgs e)
         {
             string username = txtUsuario.Text.Trim();
@@ -84,17 +86,20 @@ namespace epjb.View
             }
         }
 
+        // Cancela o cadastro e devolve o controle à tela de login.
         private void btnVoltar_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
 
+        // Mascara visualmente a senha; isso não implementa criptografia de rede.
         private void txtSenha_TextChanged(object sender, EventArgs e)
         {
             txtSenha.PasswordChar = '*';
         }
 
+        // Aplica a mesma máscara ao campo de confirmação.
         private void txtConfirmaSenha_TextChanged(object sender, EventArgs e)
         {
             txtConfirmaSenha.PasswordChar = '*';

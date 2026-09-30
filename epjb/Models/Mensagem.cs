@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace epjb.Models
 {
+    // Post persistido: IdUsuario identifica o autor, DataEdicao só é preenchida após edição.
     public class Mensagem
     {
         [Key]

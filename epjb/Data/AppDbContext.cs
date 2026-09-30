@@ -3,8 +3,10 @@ using epjb.Models;
 
 namespace epjb.Data
 {
+    // Entity Framework cuida apenas da persistência local no servidor; não transporta mensagens de rede.
     public class AppDbContext : DbContext
     {
+        // Cada DbSet corresponde a uma tabela; o contexto pertence a uma operação/repositório.
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Mensagem> Mensagens { get; set; }
         public DbSet<UsuarioSeguidor> UsuarioSeguidores { get; set; }
@@ -16,10 +18,12 @@ namespace epjb.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
+            // O caminho é mostrado no console para evitar que dois servidores usem bancos diferentes sem perceber.
             Directory.CreateDirectory(Path.GetDirectoryName(CaminhoBanco)!);
             var connectionString = new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder
             {
                 DataSource = CaminhoBanco,
+                // SQLite serializa escritas: aguarda a liberação de uma escrita concorrente.
                 DefaultTimeout = 30
             };
             options.UseSqlite(connectionString.ToString());

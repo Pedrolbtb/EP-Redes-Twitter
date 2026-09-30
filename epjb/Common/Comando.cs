@@ -1,5 +1,7 @@
-﻿using System;
+using System;
 
+// Os valores numéricos viajam no JSON. Não reordenar: quebraria a compatibilidade com outros clientes.
+// EDITAR_MSG e LISTAR_SEGUIDORES são reservados; o dispatcher atual ainda não os implementa.
 public enum Comando
 {
 	LOGIN,

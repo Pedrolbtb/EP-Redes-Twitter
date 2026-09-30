@@ -1,4 +1,5 @@
-﻿using System;
+// Código gerado pelo EF: snapshot/migration do esquema; não participa da comunicação de rede.
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable

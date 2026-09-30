@@ -1,4 +1,5 @@
-﻿namespace epjb.View
+// Formulário legado não compilado por ServerSide (servidor atual é console).
+namespace epjb.View
 {
     partial class Login
     {

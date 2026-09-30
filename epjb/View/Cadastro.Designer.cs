@@ -1,3 +1,4 @@
+// Layout gerado pelo Windows Forms Designer; os eventos e regras estão no arquivo .cs da tela.
 namespace epjb.View
 {
     partial class Cadastro
