@@ -1,0 +1,125 @@
+RELATORIO | Fase: criar; destino TCP 127.0.0.1:11000; UDP 11001.
+RELATORIO | Dois clientes de console no mesmo Linux; sem interface Windows Forms.
+[ServicoApi] Executando comando: CADASTRO
+[ServicoApi] Executando comando: CADASTRO
+[ConexaoServidor] Conectando a 127.0.0.1:11000...
+[ConexaoServidor] Conectando a 127.0.0.1:11000...
+[ConexaoServidor] Conectado com sucesso
+[ConexaoServidor] Conectado com sucesso
+[ConexaoServidor] Enviando mensagem...
+[ConexaoServidor] Enviando mensagem...
+[ConexaoServidor] Mensagem enviada
+[ConexaoServidor] Mensagem enviada
+[ConexaoServidor] Recebendo mensagem...
+[ConexaoServidor] Recebendo mensagem...
+[ConexaoServidor] Mensagem recebida
+[ServicoApi] Resposta recebida: Sucesso=True
+[ConexaoServidor] Desconectado
+[ConexaoServidor] Mensagem recebida
+[ServicoApi] Resposta recebida: Sucesso=True
+[ConexaoServidor] Desconectado
+RELATORIO | Cadastro A: Sucesso=True
+RELATORIO | Resposta: {"id":2,"username":"aluno_a"}
+RELATORIO | Cadastro B: Sucesso=True
+RELATORIO | Resposta: {"id":1,"username":"aluno_b"}
+[ServicoApi] Executando comando: LOGIN
+[ConexaoServidor] Conectando a 127.0.0.1:11000...
+[ConexaoServidor] Conectado com sucesso
+[ConexaoServidor] Enviando mensagem...
+[ConexaoServidor] Mensagem enviada
+[ConexaoServidor] Recebendo mensagem...
+[ConexaoServidor] Mensagem recebida
+[ServicoApi] Resposta recebida: Sucesso=True
+[ConexaoServidor] Desconectado
+RELATORIO | Login A: Sucesso=True
+RELATORIO | Resposta: {"id":2,"username":"aluno_a"}
+[ServicoApi] Executando comando: LOGIN
+[ConexaoServidor] Conectando a 127.0.0.1:11000...
+[ConexaoServidor] Conectado com sucesso
+[ConexaoServidor] Enviando mensagem...
+[ConexaoServidor] Mensagem enviada
+[ConexaoServidor] Recebendo mensagem...
+[ConexaoServidor] Mensagem recebida
+[ServicoApi] Resposta recebida: Sucesso=True
+[ConexaoServidor] Desconectado
+RELATORIO | Login B: Sucesso=True
+RELATORIO | Resposta: {"id":1,"username":"aluno_b"}
+[ServicoApi] Executando comando: POSTAR_MSG
+[ServicoApi] Executando comando: POSTAR_MSG
+[ConexaoServidor] Conectando a 127.0.0.1:11000...
+[ConexaoServidor] Conectando a 127.0.0.1:11000...
+[ConexaoServidor] Conectado com sucesso
+[ConexaoServidor] Conectado com sucesso
+[ConexaoServidor] Enviando mensagem...
+[ConexaoServidor] Enviando mensagem...
+[ConexaoServidor] Mensagem enviada
+[ConexaoServidor] Recebendo mensagem...
+[ConexaoServidor] Mensagem enviada
+[ConexaoServidor] Recebendo mensagem...
+[ConexaoServidor] Mensagem recebida
+[ServicoApi] Resposta recebida: Sucesso=True
+[ConexaoServidor] Desconectado
+[ConexaoServidor] Mensagem recebida
+[ServicoApi] Resposta recebida: Sucesso=True
+[ConexaoServidor] Desconectado
+RELATORIO | Post A: Sucesso=True
+RELATORIO | Resposta: {"id":2}
+RELATORIO | Post B: Sucesso=True
+RELATORIO | Resposta: {"id":1}
+[ServicoApi] Executando comando: SEGUIR
+[ConexaoServidor] Conectando a 127.0.0.1:11000...
+[ConexaoServidor] Conectado com sucesso
+[ConexaoServidor] Enviando mensagem...
+[ConexaoServidor] Mensagem enviada
+[ConexaoServidor] Recebendo mensagem...
+[ConexaoServidor] Mensagem recebida
+[ServicoApi] Resposta recebida: Sucesso=True
+[ConexaoServidor] Desconectado
+RELATORIO | A segue B: Sucesso=True
+RELATORIO | Resposta: null
+[ServicoApi] Executando comando: LISTAR_MSGS
+[ServicoApi] Executando comando: LISTAR_MSGS
+[ConexaoServidor] Conectando a 127.0.0.1:11000...
+[ConexaoServidor] Conectando a 127.0.0.1:11000...
+[ConexaoServidor] Conectado com sucesso
+[ConexaoServidor] Conectado com sucesso
+[ConexaoServidor] Enviando mensagem...
+[ConexaoServidor] Enviando mensagem...
+[ConexaoServidor] Mensagem enviada
+[ConexaoServidor] Mensagem enviada
+[ConexaoServidor] Recebendo mensagem...
+[ConexaoServidor] Recebendo mensagem...
+[ConexaoServidor] Mensagem recebida
+[ServicoApi] Resposta recebida: Sucesso=True
+[ConexaoServidor] Mensagem recebida
+[ServicoApi] Resposta recebida: Sucesso=True
+[ConexaoServidor] Desconectado
+[ConexaoServidor] Desconectado
+RELATORIO | Feed recebido por A: Sucesso=True
+RELATORIO | Resposta: [{"id":2,"idUsuario":2,"username":"aluno_a","conteudo":"Ola! Mensagem publicada pelo cliente A.","dataCriacao":"2026-09-30T20:42:35.8881843","dataEdicao":null},{"id":1,"idUsuario":1,"username":"aluno_b","conteudo":"O cliente B usa o mesmo banco central.","dataCriacao":"2026-09-30T20:42:35.8881752","dataEdicao":null}]
+RELATORIO | Feed recebido por B: Sucesso=True
+RELATORIO | Resposta: [{"id":2,"idUsuario":2,"username":"aluno_a","conteudo":"Ola! Mensagem publicada pelo cliente A.","dataCriacao":"2026-09-30T20:42:35.8881843","dataEdicao":null},{"id":1,"idUsuario":1,"username":"aluno_b","conteudo":"O cliente B usa o mesmo banco central.","dataCriacao":"2026-09-30T20:42:35.8881752","dataEdicao":null}]
+RELATORIO | CONFIRMADO: ambos os clientes receberam os mesmos 2 posts.
+[ServicoApi] Executando comando: LISTAR_MEUS_SEGUINDO
+[ConexaoServidor] Conectando a 127.0.0.1:11000...
+[ConexaoServidor] Conectado com sucesso
+[ConexaoServidor] Enviando mensagem...
+[ConexaoServidor] Mensagem enviada
+[ConexaoServidor] Recebendo mensagem...
+[ConexaoServidor] Mensagem recebida
+[ServicoApi] Resposta recebida: Sucesso=True
+[ConexaoServidor] Desconectado
+RELATORIO | Usuarios que A segue: Sucesso=True
+RELATORIO | Resposta: [{"id":1,"username":"aluno_b"}]
+[ServicoApi] Executando comando: LISTAR_MEUS_SEGUIDORES
+[ConexaoServidor] Conectando a 127.0.0.1:11000...
+[ConexaoServidor] Conectado com sucesso
+[ConexaoServidor] Enviando mensagem...
+[ConexaoServidor] Mensagem enviada
+[ConexaoServidor] Recebendo mensagem...
+[ConexaoServidor] Mensagem recebida
+[ServicoApi] Resposta recebida: Sucesso=True
+[ConexaoServidor] Desconectado
+RELATORIO | Seguidores de B: Sucesso=True
+RELATORIO | Resposta: [{"id":2,"username":"aluno_a"}]
+RELATORIO | UDP: PING/PONG confirmado com nonce correspondente.

@@ -1,0 +1,16 @@
+Banco central: /home/walmir/Documents/epjb/relatorio-evidencias-2026-09-30/dados/demonstracao.db
+Mantenha esta janela aberta. Nos clientes, use Servidor... para informar o IPv4 deste PC.
+Servidor TCP aguardando clientes em 0.0.0.0:11000
+Diagnóstico UDP aguardando em 0.0.0.0:11001
+Recebido comando: LOGIN
+[UsuarioRepositorio] Usuário aluno_a autenticado com sucesso
+Recebido comando: LOGIN
+[UsuarioRepositorio] Usuário aluno_b autenticado com sucesso
+Recebido comando: LISTAR_MSGS
+Recebido comando: LISTAR_MSGS
+[MensagemRepositorio] Listadas 2 mensagens
+[MensagemRepositorio] Listadas 2 mensagens
+Recebido comando: LISTAR_MEUS_SEGUINDO
+[SeguidorRepositorio] Usuário 2 segue 1 usuários
+Recebido comando: LISTAR_MEUS_SEGUIDORES
+[SeguidorRepositorio] Usuário 1 tem 1 seguidores

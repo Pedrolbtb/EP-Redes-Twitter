@@ -1,0 +1,3 @@
+# Estes logs são evidências versionadas; a regra global [Ll]ogs/ é para logs de execução comuns.
+!logs/
+!logs/**

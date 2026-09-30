@@ -1,0 +1,30 @@
+{
+  "Usuarios": [
+    [
+      1,
+      "aluno_b"
+    ],
+    [
+      2,
+      "aluno_a"
+    ]
+  ],
+  "Mensagens": [
+    [
+      1,
+      1,
+      "O cliente B usa o mesmo banco central."
+    ],
+    [
+      2,
+      2,
+      "Ola! Mensagem publicada pelo cliente A."
+    ]
+  ],
+  "UsuarioSeguidores": [
+    [
+      2,
+      1
+    ]
+  ]
+}
