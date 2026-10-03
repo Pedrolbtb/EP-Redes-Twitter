@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace epjb.Models
 {
+    // Aresta do relacionamento: IdUsuario segue IdSeguido; a direção não é simétrica.
     public class UsuarioSeguidor
     {
         [Key]

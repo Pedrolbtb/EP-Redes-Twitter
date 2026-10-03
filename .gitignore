@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Banco em execução no servidor (o banco legado já versionado é preservado)
+**/dados/
+*.db-wal
+*.db-shm
+*.db-journal

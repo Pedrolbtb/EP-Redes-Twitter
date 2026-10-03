@@ -1,15 +1,19 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net10.0-windows</TargetFramework>
-		<Nullable>enable</Nullable>
-		<UseWindowsForms>true</UseWindowsForms>
-		<ImplicitUsings>enable</ImplicitUsings>
-	</PropertyGroup>
-
-	<ItemGroup>
-	  <Folder Include="Sockets\" />
-	</ItemGroup>
-
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="View/**/*.cs" />
+    <EmbeddedResource Remove="View/**/*.resx" />
+    <!-- Reutiliza a implementação do Pedro sem duplicar os fontes. -->
+    <Compile Include="../epjb/Common/**/*.cs;../epjb/Data/**/*.cs;../epjb/Models/**/*.cs;../epjb/Migrations/**/*.cs;../epjb/Repositorio/**/*.cs;../epjb/Sockets/**/*.cs" LinkBase="Compartilhado" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
+  </ItemGroup>
 </Project>

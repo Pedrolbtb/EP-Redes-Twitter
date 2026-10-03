@@ -7,35 +7,66 @@ namespace epjb.Cliente.Rede
 {
     /// <summary>
     /// Responsável pela conexão TCP com o servidor.
-    /// Encapsula a lógica de conectar e comunicar usando o protocolo padronizado.
+    /// Código do grupo: cria o Socket diretamente; Protocolo também usa Send/Receive manuais.
     /// </summary>
     public class ConexaoServidor : IDisposable
     {
-        private const int Porta = Config.Porta;
-        private Socket socket;
+        private Socket socket = null!;
+        private readonly ConfiguracaoServidor? configuracao;
+
+        // O teste da tela pode usar um destino ainda não salvo. As demais chamadas leem o JSON.
+        public ConexaoServidor(ConfiguracaoServidor? configuracao = null)
+        {
+            this.configuracao = configuracao;
+        }
         private bool conectado = false;
 
         public bool EstaConectado => conectado && socket?.Connected == true;
 
         /// <summary>
-        /// Conecta ao servidor usando o endereço de loopback (localhost).
+        /// Conecta ao endereço configurado em servidor.json ou EPJB_SERVER_HOST.
         /// </summary>
         public void Conectar()
         {
+            var config = configuracao ?? ConfiguracaoServidor.Carregar();
+            config.Validar();
             try
             {
-                Console.WriteLine("[ConexaoServidor] Iniciando conexão...");
-                IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Loopback, Porta);
-                socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                socket.Connect(remoteEndPoint);
+                Console.WriteLine($"[ConexaoServidor] Conectando a {config.Host}:{config.Porta}...");
+                // Stream + Tcp cria um socket TCP do sistema operacional, sem TcpClient/HTTP/RPC.
+                // Esse construtor aceita IPv4 e, quando disponível, IPv6.
+                socket = new Socket(SocketType.Stream, ProtocolType.Tcp)
+                {
+                    ReceiveTimeout = 15000,
+                    SendTimeout = 15000
+                };
+                // ConnectAsync é uma operação do próprio Socket; o prazo evita esperar indefinidamente.
+                // Task.Run em ServicoApi mantém a interface livre enquanto aguardamos a rede.
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                socket.ConnectAsync(config.Host, config.Porta, timeout.Token).AsTask().GetAwaiter().GetResult();
                 conectado = true;
                 Console.WriteLine("[ConexaoServidor] Conectado com sucesso");
             }
             catch (Exception ex)
             {
+                socket?.Dispose();
+                socket = null!;
                 conectado = false;
                 Console.WriteLine($"[ConexaoServidor] Erro ao conectar: {ex.Message}");
-                throw;
+                // Preserva a exceção original para diagnóstico e mostra ao usuário o destino real.
+                string motivo = ex switch
+                {
+                    SocketException { SocketErrorCode: SocketError.ConnectionRefused } => "Conexão recusada pelo destino",
+                    SocketException { SocketErrorCode: SocketError.HostNotFound } => "Nome do servidor não encontrado",
+                    OperationCanceledException => "Tempo de conexão esgotado (10 segundos)",
+                    _ => ex.Message
+                };
+                throw new IOException(
+                    $"{motivo}: {config.Host}:{config.Porta}.\n\n" +
+                    "1. Inicie ServerSide no PC que guarda o banco e aguarde 'Servidor TCP aguardando clientes'.\n" +
+                    "2. Em Servidor... na tela de login, informe o IPv4 desse PC (ipconfig).\n" +
+                    "3. Confira a porta e a liberação TCP no firewall.\n\n" +
+                    "localhost/127.0.0.1 apontam para este computador; use-os somente se o servidor estiver aqui.", ex);
             }
         }
 
@@ -71,7 +102,9 @@ namespace epjb.Cliente.Rede
             try
             {
                 Console.WriteLine("[ConexaoServidor] Recebendo mensagem...");
-                Mensagem resposta = Protocolo.Receber(socket);
+                // Receive pode retornar fim de conexão: isso é falha, e não um login rejeitado.
+                Mensagem resposta = Protocolo.Receber(socket)
+                    ?? throw new IOException("O servidor fechou a conexão antes de responder.");
                 Console.WriteLine("[ConexaoServidor] Mensagem recebida");
                 return resposta;
             }
@@ -91,6 +124,7 @@ namespace epjb.Cliente.Rede
             {
                 if (socket != null && socket.Connected)
                 {
+                    // Encerra envio e recepção antes de liberar o descritor nativo.
                     socket.Shutdown(SocketShutdown.Both);
                 }
             }

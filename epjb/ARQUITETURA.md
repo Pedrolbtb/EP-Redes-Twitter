@@ -1,3 +1,5 @@
+> **Atualização — banco compartilhado:** este documento registra o estágio anterior à separação do servidor. Para executar em dois PCs, siga o [README atual](../README.md) e a [documentação da correção](../docs/CORRECAO_BANCO_COMPARTILHADO.md). O cliente não inicia mais um servidor local.
+
 # Arquitetura do Projeto EP-Redes-Twitter
 
 ## Estado Atual (Fase 3 Concluída)

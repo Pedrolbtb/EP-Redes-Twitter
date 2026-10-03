@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json;
 using System.Windows.Forms;
 using epjb.Cliente.Rede;
@@ -7,16 +7,27 @@ namespace epjb.View
 {
     public partial class Login : Form
     {
+        // Monta a tela de autenticação e o acesso à configuração de conexão.
         public Login()
         {
             InitializeComponent();
+            // Este botão abre apenas a configuração do cliente; nunca inicia outro banco/servidor.
+            var servidor = new Button { Text = "Servidor...", Location = new System.Drawing.Point(50, 210), Width = 130 };
+            servidor.Click += (_, _) =>
+            {
+                using var tela = new ConfiguracaoConexao();
+                tela.ShowDialog(this);
+            };
+            Controls.Add(servidor);
         }
 
+        // Fecha a aplicação cliente; o servidor independente permanece em execução.
         private void btnFechar_Click(object sender, EventArgs e)
         {
             this.Close();
         }
 
+        // Valida os campos, envia LOGIN por TCP e abre o feed somente após resposta de sucesso.
         private async void btnLogin_Click(object sender, EventArgs e)
         {
             string username = txtUsuario.Text.Trim();
@@ -74,6 +85,7 @@ namespace epjb.View
             }
         }
 
+        // Abre o cadastro usando a mesma configuração de servidor do login.
         private void btnCadastro_Click(object sender, EventArgs e)
         {
             var cadastro = new Cadastro();

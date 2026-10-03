@@ -1,17 +1,12 @@
-using epjb.Sockets;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
 namespace epjb
 {
-    class Program
+    internal static class Program
     {
+        // Windows Forms exige uma thread STA para os controles da interface.
+        [STAThread]
         static void Main()
         {
-            // Temporário: iniciar o servidor neste processo para testes locais.
-            // Remover ou revisar quando o grupo decidir como o servidor será executado (processo separado conforme roteiro).
-            System.Threading.Tasks.Task.Run(() => AsyncSocketListener.StartListener());
-
+            // O cliente só abre telas: o servidor precisa ser iniciado separadamente, uma única vez.
             ApplicationConfiguration.Initialize();
             Application.Run(new View.Login());
         }

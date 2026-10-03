@@ -9,12 +9,13 @@ namespace epjb.Repositorio
     /// <summary>
     /// Repositório para operações de seguir/desseguir usuários.
     /// </summary>
-    public class SeguidorRepositorio
+    public class SeguidorRepositorio : IDisposable
     {
         private readonly AppDbContext dbContext;
 
         public SeguidorRepositorio()
         {
+            // Contextos EF não são compartilhados entre as tarefas dos clientes.
             dbContext = new AppDbContext();
         }
 
@@ -49,6 +50,7 @@ namespace epjb.Repositorio
                 };
 
                 dbContext.UsuarioSeguidores.Add(seguimento);
+                // Confirma as alterações no SQLite central antes de responder ao cliente.
                 dbContext.SaveChanges();
 
                 Console.WriteLine($"[SeguidorRepositorio] Usuário {idUsuario} agora segue {idUsuarioASeguir}");
@@ -78,6 +80,7 @@ namespace epjb.Repositorio
                 }
 
                 dbContext.UsuarioSeguidores.Remove(seguimento);
+                // Confirma as alterações no SQLite central antes de responder ao cliente.
                 dbContext.SaveChanges();
 
                 Console.WriteLine($"[SeguidorRepositorio] Usuário {idUsuario} deixou de seguir {idUsuarioADesseguir}");
@@ -168,6 +171,7 @@ namespace epjb.Repositorio
             }
         }
 
+        // O using do handler chama Dispose mesmo se ocorrer exceção durante a consulta.
         public void Dispose()
         {
             dbContext?.Dispose();

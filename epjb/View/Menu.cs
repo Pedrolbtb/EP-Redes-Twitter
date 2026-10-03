@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Windows.Forms;
 using epjb.Cliente.Rede;
+using epjb.Common.DTO;
 
 namespace epjb.View
 {
@@ -12,6 +13,7 @@ namespace epjb.View
         private string usuarioUsername;
         private ServicoApi servico;
 
+        // Recebe a identidade retornada pelo login e prepara as chamadas ao servidor.
         public Menu(int id, string username)
         {
             InitializeComponent();
@@ -20,6 +22,7 @@ namespace epjb.View
             servico = new ServicoApi();
         }
 
+        // Carrega feed e relacionamentos quando o formulário fica pronto.
         private async void Menu_Load(object sender, EventArgs e)
         {
             lblUsuario.Text = $"Bem-vindo, {usuarioUsername}!";
@@ -28,6 +31,7 @@ namespace epjb.View
             await CarregarMeusSeguindo();
         }
 
+        // Busca o feed central e vincula DTOs tipados às colunas da tabela.
         private async System.Threading.Tasks.Task CarregarTimeline()
         {
             try
@@ -36,7 +40,7 @@ namespace epjb.View
 
                 if (resposta?.Sucesso == true)
                 {
-                    var mensagens = JsonSerializer.Deserialize<List<dynamic>>(resposta.PayloadJson);
+                    var mensagens = JsonSerializer.Deserialize<List<MensagemResumo>>(resposta.PayloadJson);
 
                     dgvMensagens.DataSource = null;
                     dgvMensagens.DataSource = mensagens;
@@ -49,6 +53,7 @@ namespace epjb.View
             }
         }
 
+        // Atualiza os candidatos a seguir, mantendo ID como valor e username como texto.
         private async System.Threading.Tasks.Task CarregarUsuarios()
         {
             try
@@ -57,7 +62,7 @@ namespace epjb.View
 
                 if (resposta?.Sucesso == true)
                 {
-                    var usuarios = JsonSerializer.Deserialize<List<dynamic>>(resposta.PayloadJson);
+                    var usuarios = JsonSerializer.Deserialize<List<UsuarioResumo>>(resposta.PayloadJson);
 
                     cmbUsuarios.DataSource = null;
                     cmbUsuarios.DataSource = usuarios;
@@ -71,6 +76,7 @@ namespace epjb.View
             }
         }
 
+        // Substitui a lista de seguindo para não duplicar itens a cada atualização.
         private async System.Threading.Tasks.Task CarregarMeusSeguindo()
         {
             try
@@ -79,9 +85,10 @@ namespace epjb.View
 
                 if (resposta?.Sucesso == true)
                 {
-                    var seguindo = JsonSerializer.Deserialize<List<dynamic>>(resposta.PayloadJson);
+                    var seguindo = JsonSerializer.Deserialize<List<UsuarioResumo>>(resposta.PayloadJson) ?? new();
 
                     lstSeguindo.DataSource = null;
+                    lstSeguindo.Items.Clear();
                     foreach (var user in seguindo)
                     {
                         lstSeguindo.Items.Add(user);
@@ -94,6 +101,7 @@ namespace epjb.View
             }
         }
 
+        // Valida o limite de texto, solicita a gravação no servidor e recarrega o feed.
         private async void btnPostar_Click(object sender, EventArgs e)
         {
             string conteudo = txtConteudo.Text.Trim();
@@ -131,6 +139,7 @@ namespace epjb.View
             }
         }
 
+        // Envia os IDs de quem segue e de quem será seguido ao servidor.
         private async void btnSeguir_Click(object sender, EventArgs e)
         {
             if (cmbUsuarios.SelectedValue == null)
@@ -167,6 +176,7 @@ namespace epjb.View
             }
         }
 
+        // Confirma a exclusão e envia o comando; o repositório também verifica a autoria.
         private async void btnDeletar_Click(object sender, EventArgs e)
         {
             if (dgvMensagens.SelectedRows.Count == 0)
@@ -210,15 +220,19 @@ namespace epjb.View
             }
         }
 
+        // Fecha o feed e retorna ao login sem encerrar o servidor.
         private void btnLogout_Click(object sender, EventArgs e)
         {
             servico?.Dispose();
             this.Close();
         }
 
+        // Consulta novamente o servidor para refletir alterações feitas pelo outro PC.
         private async void btnAtualizar_Click(object sender, EventArgs e)
         {
             await CarregarTimeline();
+            await CarregarUsuarios();
+            await CarregarMeusSeguindo();
         }
     }
 }

@@ -1,7 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace epjb.Models
 {
+    // Conta persistida no servidor; as listas abaixo são relações EF, não dados enviados ao cliente.
     public class Usuario
     {
         [Key]
